@@ -17,7 +17,6 @@ typedef struct team{
 }Team;
 Team *teams[5] = {NULL};
 
-
 int modeDecision();
 void addPlayersSoloMode();
 void addPlayersTeamMode();
