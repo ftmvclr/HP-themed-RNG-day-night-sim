@@ -84,10 +84,15 @@ void addPlayersTeamMode(){
 	}
 	for(; teamNo < 5; teamNo++){
 		for(i = 0; i < team_size; i++){
-			printf("Enter player #%d for team #%d\n* for next team\n", i + 1, teamNo + 1);
+			printf("Enter player #%d for team #%d\n* for next team\n\\for exitting menu\n", i + 1, teamNo + 1);
 			scanf(" %31[^\n]", buffer);
 			if(buffer[0] == '*'){
-				printf("Okay, there are (%d) players in team #%d\n", i + 1, teamNo + 1);
+				printf("Okay team #%d is complete\n", teamNo + 1);
+				break;
+			}
+			if(buffer[0] == '\\'){
+				printf("Okay there are %d teams\n", teamNo + 1);
+				teamNo = 5; // to get rid of the outer loop
 				break;
 			}
 			Player *temp = (Player *)malloc(sizeof(Player));
