@@ -32,7 +32,7 @@ int main(){
 	}
 	else
 		addPlayersSoloMode();
-
+	printAllPlayers();
 }
 int modeDecision(){
 	char mode = '\0';
@@ -54,7 +54,7 @@ int modeDecision(){
 }
 
 void addPlayersSoloMode(){
-	int i;
+	int i = 0;
 	printf("Add players to the Harry Potter simulation\n* to stop\n");
 	for(i = 0; i < LIMIT; i++){
 		scanf("%31s", buffer);
@@ -82,9 +82,10 @@ void addPlayersTeamMode(){
 		if(teams[i] == NULL)
 			exit(89);
 	}
+	printf("*for next team\n\\for exitting menu\n");
 	for(; teamNo < 5; teamNo++){
 		for(i = 0; i < team_size; i++){
-			printf("Enter player #%d for team #%d\n* for next team\n\\for exitting menu\n", i + 1, teamNo + 1);
+			printf("Enter player #%d for team #%d\n", i + 1, teamNo + 1);
 			scanf(" %31[^\n]", buffer);
 			if(buffer[0] == '*'){
 				printf("Okay team #%d is complete\n", teamNo + 1);
@@ -107,10 +108,15 @@ void addPlayersTeamMode(){
 }
 
 void printAllPlayers(){
+	int i, j = 0;
 	if(team_mode_on){
-
+		for(i = 0; teams[i] != NULL ; i++) // iterating teams
+			for(j = 0; teams[i]->teamPlayers[j] != NULL ; j++) // iterating team players
+				printf("team: %d player: %d  :  %s\n", i + 1, j + 1, teams[i]->teamPlayers[j]->name);
 	}
 	else{
-
+		for(i = 0; soloPlayers[i] != NULL; i++){
+			printf("%d: %s\n", i + 1, soloPlayers[i]->name);
+		}
 	}
 }
