@@ -57,12 +57,12 @@ void addPlayersSoloMode(){
 	int i = 0;
 	printf("Add players to the Harry Potter simulation\n* to stop\n");
 	for(i = 0; i < LIMIT; i++){
-		scanf("%31s", buffer);
+		scanf(" %31[^\n]", buffer);
 		if(buffer[0] == '*'){
 			printf("Okay, there are (%d) players in.\n", i);
 			break;
 		}
-		Player *temp = (Player *)malloc(sizeof(Player));
+		Player *temp = (Player *)calloc(1, sizeof(Player));
 		if(temp == NULL)
 			exit(111);
 		soloPlayers[i] = temp;
@@ -78,7 +78,7 @@ void addPlayersTeamMode(){
 	puts("team consists of max ___ players.");
 	scanf("%d", &team_size);
 	for(i = 0; i < 5; i++){
-		teams[i] = (Team *)malloc(sizeof(Team));
+		teams[i] = (Team *)calloc(1, sizeof(Team));
 		if(teams[i] == NULL)
 			exit(89);
 	}
@@ -96,7 +96,7 @@ void addPlayersTeamMode(){
 				teamNo = 5; // to get rid of the outer loop
 				break;
 			}
-			Player *temp = (Player *)malloc(sizeof(Player));
+			Player *temp = (Player *)calloc(1, sizeof(Player));
 			if(temp == NULL)
 				exit(111);
 			(teams[teamNo])->teamPlayers[i] = temp;
