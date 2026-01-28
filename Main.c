@@ -6,6 +6,8 @@
 #include <math.h>
 
 #define LIMIT 10
+enum effectType {FATAL, DAMAGE, HEAL, MISC};
+
 typedef struct player{
 	char name[32];
 	int HP;
@@ -15,17 +17,33 @@ Player *soloPlayers[30] = {NULL};
 typedef struct team{
 	Player *teamPlayers[10];
 }Team;
-Team *teams[5] = {NULL};
+Team *teams[4] = {NULL};
+
+typedef struct message{
+	char message[128];
+	enum effectType fx;
+	int effectAmount;
+	int formatCount; // number of %s's
+}Message;
+Message *messages[30] = {NULL};
 
 int modeDecision();
 void addPlayersSoloMode();
 void addPlayersTeamMode();
 void printAllPlayers();
+int strFormatCount(char *str);
 
 int team_mode_on = 0;
-char buffer[32] = {'\0'};
+char buffer[32] = {'\0'}; /*names*/
+/*
+i think each day we should loop through every player in single mode
+and in teams mode i think looping through teams is enough
+1 person selected from each team or like maybe 2 if it is a crowded lobby
 
+*/
 int main(){
+	/*registering all the players whether it is team or solo mode */
+	readMessageInput();
 	printf("Team Mode? Y/N\n");
 	if(modeDecision()){
 		addPlayersTeamMode();
@@ -33,6 +51,7 @@ int main(){
 	else
 		addPlayersSoloMode();
 	printAllPlayers();
+	// ok now that we have all the players set up, what do we do for the game?
 }
 int modeDecision(){
 	char mode = '\0';
@@ -51,6 +70,18 @@ int modeDecision(){
 		}
 	} while(!mode);
 	return 0;
+}
+
+void readMessageInput(){
+	FILE *file = fopen("messages.txt", "r");
+	while(fgets(buffer, sizeof(buffer), file) != NULL) {
+		Message *append = (Message *)calloc(1, sizeof(Message));
+		if(append != NULL){
+			cleanedMessage(append);
+			append->formatCount = strFormatCount(append->message);
+		}
+	
+	}
 }
 
 void addPlayersSoloMode(){
@@ -77,13 +108,13 @@ void addPlayersTeamMode(){
 	int team_size, i, teamNo = 0;
 	puts("team consists of max ___ players.");
 	scanf("%d", &team_size);
-	for(i = 0; i < 5; i++){
+	for(i = 0; i < 4; i++){
 		teams[i] = (Team *)calloc(1, sizeof(Team));
 		if(teams[i] == NULL)
 			exit(89);
 	}
 	printf("*for next team\n\\for exitting menu\n");
-	for(; teamNo < 5; teamNo++){
+	for(; teamNo < 4; teamNo++){
 		for(i = 0; i < team_size; i++){
 			printf("Enter player #%d for team #%d\n", i + 1, teamNo + 1);
 			scanf(" %31[^\n]", buffer);
@@ -119,4 +150,20 @@ void printAllPlayers(){
 			printf("%d: %s\n", i + 1, soloPlayers[i]->name);
 		}
 	}
+}
+
+int strFormatCount(char *str){
+	int count = 0;
+	while((str = strstr(str, "%s")) != NULL) {
+		count++;
+		str += 2; // 2 because % and s
+	}
+	return count;
+}
+
+cleanedMessage(Message *msg){
+	msg->effectAmount = atoi(buffer);
+	const char *ptr = buffer;
+	for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
+	strcpy_s(msg->text, sizeof(msg->text), ptr);
 }
