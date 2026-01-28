@@ -32,6 +32,8 @@ void addPlayersSoloMode();
 void addPlayersTeamMode();
 void printAllPlayers();
 int strFormatCount(char *str);
+void cleanedMessage(Message *msg);
+void readMessageInput();
 
 int team_mode_on = 0;
 char buffer[32] = {'\0'}; /*names*/
@@ -39,7 +41,17 @@ char buffer[32] = {'\0'}; /*names*/
 i think each day we should loop through every player in single mode
 and in teams mode i think looping through teams is enough
 1 person selected from each team or like maybe 2 if it is a crowded lobby
+ok so we have formatCount and that is gonna come in handy
+i will make sure to make it so the first %s is the one taking damage in case of formatCount = 2
+*/
 
+/*
+check if effectAmount 0, then print directly (misc perhaps)
+if positive check type then do whatever
+if negative check type then do whatever
+usually the second %s won't matter
+ADD more though
+also TODO: i messed up the msg files 
 */
 int main(){
 	/*registering all the players whether it is team or solo mode */
@@ -73,6 +85,7 @@ int modeDecision(){
 }
 
 void readMessageInput(){
+	
 	FILE *file = fopen("messages.txt", "r");
 	while(fgets(buffer, sizeof(buffer), file) != NULL) {
 		Message *append = (Message *)calloc(1, sizeof(Message));
@@ -80,7 +93,6 @@ void readMessageInput(){
 			cleanedMessage(append);
 			append->formatCount = strFormatCount(append->message);
 		}
-	
 	}
 }
 
@@ -161,7 +173,7 @@ int strFormatCount(char *str){
 	return count;
 }
 
-cleanedMessage(Message *msg){
+void cleanedMessage(Message *msg){
 	msg->effectAmount = atoi(buffer);
 	const char *ptr = buffer;
 	for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
