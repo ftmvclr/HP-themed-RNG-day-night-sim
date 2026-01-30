@@ -97,7 +97,7 @@ void changeHP(Player *player, enum effectType fx, int magnitude){
 	else if(fx == DAMAGE){
 		player->HP -= magnitude;
 		if(player->HP <= 0)
-			eliminate();
+			eliminate(player);
 	}	
 }
 
@@ -239,7 +239,6 @@ void cleanedMessage(Message *msg, int fx){ // fills message and effectAmount
 		const char *ptr = buffer;
 		for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
 		strcpy_s(msg->message, sizeof(msg->message), ptr);
-		printf("%s\n", msg->message);
 	}
 	else{ // misc, no need for taking the int out
 		strcpy_s(msg->message, sizeof(msg->message), buffer);

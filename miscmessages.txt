@@ -1,3 +1,18 @@
 %s stole %s's Firebolt and flew away.
-70 %s found the Sword of Gryffindor in a frozen lake.
-60 %s found a bottle of Felix Felicis and feels lucky.
+%s forgot the password to the Fat Lady and is stuck outside sleeping on the floor.
+%s stole %s's Firebolt and flew away.
+%s cast Levicorpus on %s, leaving them dangling by their ankle.
+%s slipped a Puking Pastille into %s's pumpkin juice.
+%s hit %s with a Bat-Bogey Hex.
+%s used the Marauder's Map to ambush %s.
+%s cast Serpensortia causing a snake to chase %s.
+%s was checkmated by %s in Wizard's Chess.
+%s threw a Dungbomb into %s's cauldron.
+%s forgot the password to the Fat Lady and is stuck outside.
+%s received a Howler that exploded at the table.
+%s must write lines with a blood quill for Umbridge.
+%s was caught by Filch in the Restricted Section.
+%s splinched their eyebrows off during Apparition.
+%s swallowed the Golden Snitch.
+%s insulted a Hippogriff and is in the Hospital Wing.
+%s ruined their Polyjuice Potion by adding the wrong flies.
