@@ -1,0 +1,3 @@
+%s stole %s's Firebolt and flew away.
+70 %s found the Sword of Gryffindor in a frozen lake.
+60 %s found a bottle of Felix Felicis and feels lucky.

@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define LIMIT 10
-enum effectType {FATAL, DAMAGE, HEAL, MISC};
+enum effectType {MISC, HEAL, DAMAGE};
 
 typedef struct player{
 	char name[32];
@@ -27,16 +27,20 @@ typedef struct message{
 }Message;
 Message *messages[30] = {NULL};
 
+void engine();
 int modeDecision();
 void addPlayersSoloMode();
 void addPlayersTeamMode();
 void printAllPlayers();
 int strFormatCount(char *str);
-void cleanedMessage(Message *msg);
+void cleanedMessage(Message *msg, int);
 void readMessageInput();
+void helperFunc(FILE *file, Message *append, enum effectType fx);
 
 int team_mode_on = 0;
 char buffer[32] = {'\0'}; /*names*/
+int totalPlayerCount = 0;
+int remainingPlayers = 0;
 /*
 i think each day we should loop through every player in single mode
 and in teams mode i think looping through teams is enough
@@ -54,6 +58,7 @@ ADD more though
 also TODO: i messed up the msg files 
 */
 int main(){
+	int commandToCont = 1;
 	/*registering all the players whether it is team or solo mode */
 	readMessageInput();
 	printf("Team Mode? Y/N\n");
@@ -63,7 +68,18 @@ int main(){
 	else
 		addPlayersSoloMode();
 	printAllPlayers();
+	remainingPlayers = totalPlayerCount;
 	// ok now that we have all the players set up, what do we do for the game?
+	do{
+		engine();
+		printf("1 to continue, 0 to stop: ");
+		scanf("%d", &commandToCont);
+	} while(remainingPlayers && commandToCont);
+
+}
+
+void engine(){
+
 }
 int modeDecision(){
 	char mode = '\0';
@@ -84,13 +100,23 @@ int modeDecision(){
 	return 0;
 }
 
-void readMessageInput(){
-	
-	FILE *file = fopen("messages.txt", "r");
+void readMessageInput(){ // fills formatCount, fx
+	FILE *healFile = fopen("healmessages.txt", "r");
+	FILE *damageFile = fopen("damagemessages.txt", "r");
+	FILE *miscFile = fopen("miscmessages.txt", "r");
+	Message *append = NULL;
+
+	helperFunc(healFile, append, HEAL);
+	helperFunc(damageFile, append, DAMAGE);
+	helperFunc(miscFile, append, MISC);
+}
+
+void helperFunc(FILE *file, Message *append, enum effectType fx){
 	while(fgets(buffer, sizeof(buffer), file) != NULL) {
-		Message *append = (Message *)calloc(1, sizeof(Message));
+		append = (Message *)calloc(1, sizeof(Message));
 		if(append != NULL){
-			cleanedMessage(append);
+			cleanedMessage(append, fx);
+			append->fx = fx;
 			append->formatCount = strFormatCount(append->message);
 		}
 	}
@@ -111,6 +137,7 @@ void addPlayersSoloMode(){
 		soloPlayers[i] = temp;
 		strcpy_s(temp->name, 32, buffer);
 		printf("%dth player namely %s\n", i + 1, soloPlayers[i]->name);
+		totalPlayerCount++;
 	}
 	if(i == LIMIT)
 		puts("(reached the limit for max players)");
@@ -146,6 +173,7 @@ void addPlayersTeamMode(){
 			strcpy_s(temp->name, 32, buffer);
 			printf("%dth player in team #%d namely %s\n",
 				i + 1, teamNo + 1, teams[teamNo]->teamPlayers[i]->name);
+			totalPlayerCount++;
 		}
 	}
 }
@@ -173,9 +201,15 @@ int strFormatCount(char *str){
 	return count;
 }
 
-void cleanedMessage(Message *msg){
-	msg->effectAmount = atoi(buffer);
-	const char *ptr = buffer;
-	for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
-	strcpy_s(msg->text, sizeof(msg->text), ptr);
+void cleanedMessage(Message *msg, int fx){ // fills message and effectAmount
+	if(fx){ // not misc
+		msg->effectAmount = atoi(buffer);
+		const char *ptr = buffer;
+		for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
+		strcpy_s(msg->message, sizeof(msg->message), ptr);
+		printf("%s\n", msg->message);
+	}
+	else{ // misc, no need for taking the int out
+		strcpy_s(msg->message, sizeof(msg->message), buffer);
+	}
 }

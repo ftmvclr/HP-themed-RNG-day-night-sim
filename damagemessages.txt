@@ -1,0 +1,8 @@
+30 %s got hit by %s with a Bludger while they weren't looking. 
+47 %s used Sectumsempra on %s.
+25 %s splinched themselves while trying to Apparate. 
+19 %s ate a handful of Puking Pastilles.
+24 %s got whacked by the Whomping Willow.
+44 %s fell off their broomstick during Quidditch practice.
+37 %s challenged %s to a duel but their wand backfired.
+50 %s took massive damage, turns out %s used Expecto-Patronum.

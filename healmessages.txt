@@ -1,0 +1,6 @@
+12 %s received a chocolate frog from a sponsor.
+23 %s is hiding in the Room of Requirement.
+40 %s brewed a successful Wiggenweld Potion.
+68 %s found the Sword of Gryffindor in a frozen lake.
+59 %s found a bottle of Felix Felicis and feels lucky.
+11 %s had the chance to fly with Buckbeak, how nice!
