@@ -36,6 +36,8 @@ int strFormatCount(char *str);
 void cleanedMessage(Message *msg, int);
 void readMessageInput();
 void helperFunc(FILE *file, Message *append, enum effectType fx);
+void changeHP(Player *player, enum effectType fx, int magnitude);
+void eliminate(Player *player);
 
 int team_mode_on = 0;
 char buffer[32] = {'\0'}; /*names*/
@@ -79,25 +81,24 @@ int main(){
 }
 
 void engine(){
-
+	/*we need a way to calculate and 
+	* assign possibilities to each output
+	* after that in this func we generate a random num
+	* which should correspond to one of the messages
+	* check its affect, not misc = go for changeHP. for the selected player
+	* HOW ABOUT TAKING THE INVERSE OF EFFECTAMOUNT AND THEN CHECKING FOR SMALLER THAN THAT BETWEEN 0-1??????
+	*/
 }
-int modeDecision(){
-	char mode = '\0';
-	do{
-		scanf(" %c", &mode); // space then c, got it
-		while((getchar()) != '\n'); // this discards any trailing char
 
-		if(toupper(mode) == 'Y'){
-			team_mode_on = 1;
-			return 1;
-		}
-		else if(toupper(mode) == 'N') break;
-		else{
-			printf("Character preferably though\n");
-			mode = '\0';
-		}
-	} while(!mode);
-	return 0;
+void changeHP(Player *player, enum effectType fx, int magnitude){
+	if(fx == HEAL){
+		player->HP = (magnitude + player->HP) % 100;
+	}
+	else if(fx == DAMAGE){
+		player->HP -= magnitude;
+		if(player->HP <= 0)
+			eliminate();
+	}	
 }
 
 void readMessageInput(){ // fills formatCount, fx
@@ -178,6 +179,7 @@ void addPlayersTeamMode(){
 	}
 }
 
+//prolly should print their HP too 
 void printAllPlayers(){
 	int i, j = 0;
 	if(team_mode_on){
@@ -188,6 +190,36 @@ void printAllPlayers(){
 	else{
 		for(i = 0; soloPlayers[i] != NULL; i++){
 			printf("%d: %s\n", i + 1, soloPlayers[i]->name);
+		}
+	}
+}
+
+void eliminate(Player *player){
+	/*gotta remove from logic to prevent them from taking actions*/
+	int i, j = 0;
+	if(team_mode_on){
+		for(j = 0; j < 4; j++)
+			for(i = 0; i < 10; i++){
+				if(teams[j]->teamPlayers[i] == player){
+					// remove and break
+					teams[j]->teamPlayers[i] = NULL;
+					j = 5;
+					printf("%s has been eliminated today.\n", player->name);
+					remainingPlayers--;
+					break;
+				}
+			}
+	}
+	else{
+		for(i = 0; i < totalPlayerCount; i++){
+			if(player == soloPlayers[i]){
+ 				//remove and break
+				printf("%s has been eliminated today.\n", player->name);
+				soloPlayers[i] = NULL;
+				remainingPlayers--;
+				break;
+			}
+			
 		}
 	}
 }
@@ -212,4 +244,23 @@ void cleanedMessage(Message *msg, int fx){ // fills message and effectAmount
 	else{ // misc, no need for taking the int out
 		strcpy_s(msg->message, sizeof(msg->message), buffer);
 	}
+}
+
+int modeDecision(){
+	char mode = '\0';
+	do{
+		scanf(" %c", &mode); // space then c, got it
+		while((getchar()) != '\n'); // this discards any trailing char
+
+		if(toupper(mode) == 'Y'){
+			team_mode_on = 1;
+			return 1;
+		}
+		else if(toupper(mode) == 'N') break;
+		else{
+			printf("Character preferably though\n");
+			mode = '\0';
+		}
+	} while(!mode);
+	return 0;
 }
