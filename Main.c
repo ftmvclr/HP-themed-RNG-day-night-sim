@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <time.h>
 
 #define LIMIT 10
 enum effectType {MISC, HEAL, DAMAGE};
@@ -33,7 +34,6 @@ Message *highHealLowOdds[10];	int hhlo; /*30%*/ // (more than 40 hp)
 Message *lowHealHighOdds[10];	int lhho; /*70%*/
 /*2*/
 Message *miscHasNoOdds[20];		int mhno; /*100%*/
-
 
 void engine();
 int modeDecision();
@@ -69,6 +69,7 @@ also TODO: i messed up the msg files
 */
 int main(){
 	int commandToCont, i = 1;
+	srand(time(NULL));
 	/*registering all the players whether it is team or solo mode */
 	readMessageInput();
 	printf("Team Mode? Y/N\n");
@@ -88,6 +89,49 @@ int main(){
 }
 
 void engine(){
+	int randFx = rand() % 10;
+	enum effectType fxPerPlayer = -1;
+	double hiOrLo = 0;
+	Message *toDisplay = NULL;
+	int msgRandomizer = 0;
+	switch(randFx){
+		case 1: 
+			fxPerPlayer = MISC;
+			// pick from miscHasNoOdds
+			msgRandomizer = rand() % mhno;
+			toDisplay = miscHasNoOdds[msgRandomizer];
+			break;
+		case 6: 
+			fxPerPlayer = DAMAGE; 
+			hiOrLo = (double)rand() / RAND_MAX;
+			if(hiOrLo >= 0.8) {// high damage
+				// pick from highDamageLowOdds
+				msgRandomizer = rand() % hdlo;
+				toDisplay = highDamageLowOdds[msgRandomizer];
+			}
+			else{
+				// pick from lowDamageHighOdds
+				msgRandomizer = rand() % ldho;
+				toDisplay = lowDamageHighOdds[msgRandomizer];
+			}
+			break;
+		case 9: 
+			fxPerPlayer = HEAL;
+			hiOrLo = (double)rand() / RAND_MAX;
+			if(hiOrLo >= 0.7) {// high heal
+				// pick from highHealLowOdds
+				msgRandomizer = rand() % hhlo;
+				toDisplay = highHealLowOdds[msgRandomizer];
+
+			}
+			else{
+				// pick from lowHealHighOdds
+				msgRandomizer = rand() % lhho;
+				toDisplay = lowHealHighOdds[msgRandomizer];
+			}
+			break;
+		default: puts("error.");
+	}
 	/* select the next player.
 	 roll a dice to decide between the big 3
 	 then if it is not MISC decide if it is going 
