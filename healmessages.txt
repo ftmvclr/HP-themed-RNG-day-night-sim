@@ -1,6 +1,20 @@
 12 %s received a chocolate frog from a sponsor.
 23 %s is hiding in the Room of Requirement.
-40 %s brewed a successful Wiggenweld Potion.
+39 %s brewed a successful Wiggenweld Potion.
 68 %s found the Sword of Gryffindor in a frozen lake.
 59 %s found a bottle of Felix Felicis and feels lucky.
-11 %s had the chance to fly with Buckbeak, how nice!
+61 %s had the chance to fly with Buckbeak, how nice!
+25 %s applied Essence of Dittany to their wounds.
+51 %s was patched up by Madam Pomfrey in the Hospital Wing.
+15 %s drank a steaming goblet of Pepperup Potion.
+75 %s listened to Phoenix song and felt their strength return.
+10 %s ate a piece of chocolate offered by Professor Lupin.
+30 %s drank a bottle of Skele-Gro to mend broken bones.
+20 %s used the Episkey spell to fix a broken nose.
+45 %s received treatment from a Healer at St. Mungo's.
+90 %s was healed by the tears of a Phoenix.
+5 %s ate a Bertie Bott's Every Flavour Bean.
+100 %s drank the Elixir of Life from the Sorcerer's Stone.
+60 %s caught the Golden Snitch and felt invincible.
+12 %s ate a Pumpkin Pasty on the Hogwarts Express.
+41 %s had a peaceful sleep in their four-poster bed.

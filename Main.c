@@ -25,7 +25,15 @@ typedef struct message{
 	int effectAmount;
 	int formatCount; // number of %s's
 }Message;
-Message *messages[30] = {NULL};
+/*5*/
+Message *highDamageLowOdds[10]; int hdlo; /*20%*/ // (more than 50 damage)
+Message *lowDamageHighOdds[10]; int ldho; /*80%*/
+/*3*/
+Message *highHealLowOdds[10];	int hhlo; /*30%*/ // (more than 40 hp)
+Message *lowHealHighOdds[10];	int lhho; /*70%*/
+/*2*/
+Message *miscHasNoOdds[20];		int mhno; /*100%*/
+
 
 void engine();
 int modeDecision();
@@ -60,33 +68,32 @@ ADD more though
 also TODO: i messed up the msg files 
 */
 int main(){
-	int commandToCont = 1;
+	int commandToCont, i = 1;
 	/*registering all the players whether it is team or solo mode */
 	readMessageInput();
 	printf("Team Mode? Y/N\n");
-	if(modeDecision()){
+	if(modeDecision())
 		addPlayersTeamMode();
-	}
 	else
 		addPlayersSoloMode();
 	printAllPlayers();
 	remainingPlayers = totalPlayerCount;
-	// ok now that we have all the players set up, what do we do for the game?
+	// each day logic
 	do{
+		printf("Night #%d", i++);
 		engine();
 		printf("1 to continue, 0 to stop: ");
 		scanf("%d", &commandToCont);
 	} while(remainingPlayers && commandToCont);
-
 }
 
 void engine(){
-	/*we need a way to calculate and 
-	* assign possibilities to each output
-	* after that in this func we generate a random num
-	* which should correspond to one of the messages
-	* check its affect, not misc = go for changeHP. for the selected player
-	* HOW ABOUT TAKING THE INVERSE OF EFFECTAMOUNT AND THEN CHECKING FOR SMALLER THAN THAT BETWEEN 0-1??????
+	/* select the next player.
+	 roll a dice to decide between the big 3
+	 then if it is not MISC decide if it is going 
+	 to be low or high odds
+	 select the message AND THEN 
+	 select 2ndary player if necessary (formatCount > 1)
 	*/
 }
 
@@ -120,6 +127,31 @@ void helperFunc(FILE *file, Message *append, enum effectType fx){
 			append->fx = fx;
 			append->formatCount = strFormatCount(append->message);
 		}
+	}
+}
+// fills message and effectAmount, also fills all msg arrays
+void cleanedMessage(Message *msg, int fx){ 
+	if(fx){ // not misc
+		msg->effectAmount = atoi(buffer);
+		const char *ptr = buffer;
+		for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
+		strcpy_s(msg->message, sizeof(msg->message), ptr);
+		if(fx == HEAL){
+			if(msg->effectAmount > 40)
+				highHealLowOdds[hhlo++] = msg;
+			else
+				lowHealHighOdds[lhho++] = msg;
+		}
+		else if(fx == DAMAGE){
+			if(msg->effectAmount > 50)
+				highDamageLowOdds[hdlo++] = msg;
+			else
+				lowDamageHighOdds[ldho++] = msg;
+		}
+	}
+	else{ // misc, no need for taking the int out
+		strcpy_s(msg->message, sizeof(msg->message), buffer);
+		miscHasNoOdds[mhno++] = msg;
 	}
 }
 
@@ -231,18 +263,6 @@ int strFormatCount(char *str){
 		str += 2; // 2 because % and s
 	}
 	return count;
-}
-
-void cleanedMessage(Message *msg, int fx){ // fills message and effectAmount
-	if(fx){ // not misc
-		msg->effectAmount = atoi(buffer);
-		const char *ptr = buffer;
-		for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
-		strcpy_s(msg->message, sizeof(msg->message), ptr);
-	}
-	else{ // misc, no need for taking the int out
-		strcpy_s(msg->message, sizeof(msg->message), buffer);
-	}
 }
 
 int modeDecision(){
