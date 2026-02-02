@@ -1,6 +1,0 @@
-%s casts Avada Kedavra on %s
-%s got pushed off the Astronomy Tower by %s
-%s fed Aragog's children, in the Forbidden Forest, with %s
-%s tried to pet a Blast-Ended Skrewt. Bad idea.
-%s looked a Basilisk directly in the eye.
-%s was Kissed by a Dementor.

@@ -1,14 +1,14 @@
-30 %s got hit by %s with a Bludger while they weren't looking. 
-37 %s used Sectumsempra on %s.
-25 %s splinched themselves while trying to Apparate. 
-19 %s ate a handful of Puking Pastilles.
-24 %s got whacked by the Whomping Willow.
-44 %s fell off their broomstick during Quidditch practice.
-37 %s challenged %s to a duel but their wand backfired.
-51 %s took massive damage, turns out %s used Expecto-Patronum.
-100 %s got hit by Avada Kedavra. %s has pretty good aim.
-60 %s got pushed off the Astronomy Tower by %s.
-100 %s is fed to Aragog's children, in the Forbidden Forest, by %s.
-64 %s tried to pet a Blast-Ended Skrewt. Bad idea.
-91 %s looked a Basilisk directly in the eye.
-70 %s was Kissed by a Dementor.
+30 %s got hit by %s with a Bludger while they weren't looking.\n
+37 %s used Sectumsempra on %s.\n
+25 %s splinched themselves while trying to Apparate.\n
+19 %s ate a handful of Puking Pastilles.\n
+24 %s got whacked by the Whomping Willow.\n
+44 %s fell off their broomstick during Quidditch practice.\n
+37 %s challenged %s to a duel but their wand backfired.\n
+51 %s took massive damage, turns out %s used Expecto-Patronum.\n
+100 %s got hit by Avada Kedavra. %s has pretty good aim.\n
+60 %s got pushed off the Astronomy Tower by %s.\n
+100 %s is fed to Aragog's children, in the Forbidden Forest, by %s.\n
+64 %s tried to pet a Blast-Ended Skrewt. Bad idea.\n
+91 %s looked a Basilisk directly in the eye.\n
+70 %s was Kissed by a Dementor.\n

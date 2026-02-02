@@ -286,8 +286,8 @@ Player *pickSecondaryPlayer(Player *primary){
 					forbiddenTeam = i;
 					break;
 				}
+		return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand % 10];
 	}
-	return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand % 10];
 }
 
 void eliminate(Player *player){
