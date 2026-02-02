@@ -35,22 +35,24 @@ Message *lowHealHighOdds[10];	int lhho; /*70%*/
 /*2*/
 Message *miscHasNoOdds[20];		int mhno; /*100%*/
 
-void engine();
+void engine(Player *primary);
 int modeDecision();
 void addPlayersSoloMode();
 void addPlayersTeamMode();
-void printAllPlayers();
 int strFormatCount(char *str);
 void cleanedMessage(Message *msg, int);
 void readMessageInput();
 void helperFunc(FILE *file, Message *append, enum effectType fx);
 void changeHP(Player *player, enum effectType fx, int magnitude);
+void printDaySummary(Message *msg, Player *primary, Player *secondary);
+pickSecondaryPlayer(Player *);
 void eliminate(Player *player);
 
 int team_mode_on = 0;
 char buffer[32] = {'\0'}; /*names*/
 int totalPlayerCount = 0;
 int remainingPlayers = 0;
+int globalPseudoPtr = 0;
 /*
 i think each day we should loop through every player in single mode
 and in teams mode i think looping through teams is enough
@@ -68,7 +70,7 @@ ADD more though
 also TODO: i messed up the msg files 
 */
 int main(){
-	int commandToCont, i = 1;
+	int commandToCont, i = 1; int j = 0;
 	srand(time(NULL));
 	/*registering all the players whether it is team or solo mode */
 	readMessageInput();
@@ -77,30 +79,43 @@ int main(){
 		addPlayersTeamMode();
 	else
 		addPlayersSoloMode();
-	printAllPlayers();
+	printDaySummary();
 	remainingPlayers = totalPlayerCount;
-	// each day logic
-	do{
+
+	do{	// each day logic
 		printf("Night #%d", i++);
-		engine();
+		if(!team_mode_on){ // solo
+			for(i = 0; i < 30; i++){
+				engine(soloPlayers[i]);
+			}
+		}
+		else
+			for(i = 0; i < 4; i++){
+				for(j = 0; j < 10; j++){
+					engine(teams[i]->teamPlayers[j]);
+				}
+			}
 		printf("1 to continue, 0 to stop: ");
 		scanf("%d", &commandToCont);
 	} while(remainingPlayers && commandToCont);
 }
 
-void engine(){
+void engine(Player *primary){
 	int randFx = rand() % 10;
 	enum effectType fxPerPlayer = -1;
 	double hiOrLo = 0;
 	Message *toDisplay = NULL;
 	int msgRandomizer = 0;
+	//picking msg to display
 	switch(randFx){
+		case 0:
 		case 1: 
 			fxPerPlayer = MISC;
 			// pick from miscHasNoOdds
 			msgRandomizer = rand() % mhno;
 			toDisplay = miscHasNoOdds[msgRandomizer];
 			break;
+		case 2: case 3: case 4: case 5:
 		case 6: 
 			fxPerPlayer = DAMAGE; 
 			hiOrLo = (double)rand() / RAND_MAX;
@@ -115,6 +130,7 @@ void engine(){
 				toDisplay = lowDamageHighOdds[msgRandomizer];
 			}
 			break;
+		case 7: case 8:
 		case 9: 
 			fxPerPlayer = HEAL;
 			hiOrLo = (double)rand() / RAND_MAX;
@@ -132,13 +148,9 @@ void engine(){
 			break;
 		default: puts("error.");
 	}
-	/* select the next player.
-	 roll a dice to decide between the big 3
-	 then if it is not MISC decide if it is going 
-	 to be low or high odds
-	 select the message AND THEN 
-	 select 2ndary player if necessary (formatCount > 1)
-	*/
+	if(toDisplay->formatCount != 1){ // we need 1 more player to pick
+		pickSecondaryPlayer(primary);
+	}
 }
 
 void changeHP(Player *player, enum effectType fx, int magnitude){
@@ -255,19 +267,27 @@ void addPlayersTeamMode(){
 	}
 }
 
-//prolly should print their HP too 
-void printAllPlayers(){
-	int i, j = 0;
-	if(team_mode_on){
-		for(i = 0; teams[i] != NULL ; i++) // iterating teams
-			for(j = 0; teams[i]->teamPlayers[j] != NULL ; j++) // iterating team players
-				printf("team: %d player: %d  :  %s\n", i + 1, j + 1, teams[i]->teamPlayers[j]->name);
-	}
-	else{
-		for(i = 0; soloPlayers[i] != NULL; i++){
-			printf("%d: %s\n", i + 1, soloPlayers[i]->name);
+Player *pickSecondaryPlayer(Player *primary){
+	int i, j;
+	int forbiddenTeam = 0;
+	// secondary CANNOT be the same as primary.
+	if(!team_mode_on){ // solo
+		int pseudoPtr = rand() % 30;
+		if(soloPlayers[pseudoPtr] != primary){
+			return soloPlayers[pseudoPtr];
 		}
+		else return soloPlayers[(pseudoPtr + 1) % 30];
 	}
+	// secondary CANNOT be in the same team
+	else{ // team
+		for(i = 0; i < 4; i++)
+			for(j = 0; j < 10; j++)
+				if(teams[i]->teamPlayers[j] == primary){
+					forbiddenTeam = i;
+					break;
+				}
+	}
+	return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand % 10];
 }
 
 void eliminate(Player *player){
@@ -326,4 +346,29 @@ int modeDecision(){
 		}
 	} while(!mode);
 	return 0;
+}
+
+void printDaySummary(Message *msg, Player *primary, Player *secondary){
+	int i, j = 0;
+	if(secondary == NULL){
+		printf(msg->message, primary);
+	}
+	else
+		printf(msg->message, primary, secondary);
+	puts("Remaining Players with their HP");
+	if(!team_mode_on) // solo
+		for(i = 0; i < 30; i++){
+			if(soloPlayers[i] == NULL)
+				continue;
+			printf("%s: %d", soloPlayers[i]->name, soloPlayers[i]->HP);
+		}
+	else // team mode
+		for(i = 0; i < 4; i++){
+			for(j = 0; j < 10; j++){
+				if(teams[i]->teamPlayers[j] == NULL)
+					continue;
+				printf("Team: %d %s: %d", i, 
+					teams[i]->teamPlayers[j]->name, teams[i]->teamPlayers[j]->HP);
+			}
+		}
 }
