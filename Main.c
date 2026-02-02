@@ -44,8 +44,8 @@ void cleanedMessage(Message *msg, int);
 void readMessageInput();
 void helperFunc(FILE *file, Message *append, enum effectType fx);
 void changeHP(Player *player, enum effectType fx, int magnitude);
-void printDaySummary(Message *msg, Player *primary, Player *secondary);
-pickSecondaryPlayer(Player *);
+void printDaySummary();
+Player *pickSecondaryPlayer(Player *primary);
 void eliminate(Player *player);
 
 int team_mode_on = 0;
@@ -83,13 +83,13 @@ int main(){
 	remainingPlayers = totalPlayerCount;
 
 	do{	// each day logic
-		printf("Night #%d", i++);
+		printf("Night #%d\n", i++);
 		if(!team_mode_on){ // solo
 			for(i = 0; i < 30; i++){
 				engine(soloPlayers[i]);
 			}
 		}
-		else
+		else // team
 			for(i = 0; i < 4; i++){
 				for(j = 0; j < 10; j++){
 					engine(teams[i]->teamPlayers[j]);
@@ -101,6 +101,7 @@ int main(){
 }
 
 void engine(Player *primary){
+	Player *secondary = NULL;
 	int randFx = rand() % 10;
 	enum effectType fxPerPlayer = -1;
 	double hiOrLo = 0;
@@ -149,16 +150,22 @@ void engine(Player *primary){
 		default: puts("error.");
 	}
 	if(toDisplay->formatCount != 1){ // we need 1 more player to pick
-		pickSecondaryPlayer(primary);
+		secondary = pickSecondaryPlayer(primary);
+		printf(toDisplay->message, primary, secondary);
 	}
+	else
+		printf(toDisplay->message, primary);
+	changeHP(primary, toDisplay->fx, toDisplay->effectAmount);
 }
 
 void changeHP(Player *player, enum effectType fx, int magnitude){
 	if(fx == HEAL){
 		player->HP = (magnitude + player->HP) % 100;
+		printf("%s +%d\n", player->name, magnitude);
 	}
 	else if(fx == DAMAGE){
 		player->HP -= magnitude;
+		printf("%s -%d\n", player->name, magnitude);
 		if(player->HP <= 0)
 			eliminate(player);
 	}	
@@ -267,7 +274,7 @@ void addPlayersTeamMode(){
 	}
 }
 
-Player *pickSecondaryPlayer(Player *primary){
+Player * pickSecondaryPlayer(Player *primary){
 	int i, j;
 	int forbiddenTeam = 0;
 	// secondary CANNOT be the same as primary.
@@ -276,7 +283,9 @@ Player *pickSecondaryPlayer(Player *primary){
 		if(soloPlayers[pseudoPtr] != primary){
 			return soloPlayers[pseudoPtr];
 		}
-		else return soloPlayers[(pseudoPtr + 1) % 30];
+		else{
+			return soloPlayers[(pseudoPtr + 1) % 30];
+		}
 	}
 	// secondary CANNOT be in the same team
 	else{ // team
@@ -286,7 +295,7 @@ Player *pickSecondaryPlayer(Player *primary){
 					forbiddenTeam = i;
 					break;
 				}
-		return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand % 10];
+		return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand() % 10];
 	}
 }
 
@@ -315,7 +324,6 @@ void eliminate(Player *player){
 				remainingPlayers--;
 				break;
 			}
-			
 		}
 	}
 }
@@ -348,13 +356,8 @@ int modeDecision(){
 	return 0;
 }
 
-void printDaySummary(Message *msg, Player *primary, Player *secondary){
+void printDaySummary(){
 	int i, j = 0;
-	if(secondary == NULL){
-		printf(msg->message, primary);
-	}
-	else
-		printf(msg->message, primary, secondary);
 	puts("Remaining Players with their HP");
 	if(!team_mode_on) // solo
 		for(i = 0; i < 30; i++){
