@@ -6,7 +6,7 @@
 #include <math.h>
 #include <time.h>
 
-#define LIMIT 10
+#define LIMIT 30
 enum effectType {MISC, HEAL, DAMAGE};
 
 typedef struct player{
@@ -42,7 +42,7 @@ void addPlayersTeamMode();
 int strFormatCount(char *str);
 void cleanedMessage(Message *msg, int);
 void readMessageInput();
-void helperFunc(FILE *file, Message *append, enum effectType fx);
+void helperFunc(FILE *file, enum effectType fx);
 void changeHP(Player *player, enum effectType fx, int magnitude);
 void printDaySummary();
 Player *pickSecondaryPlayer(Player *primary);
@@ -50,27 +50,13 @@ void eliminate(Player *player);
 
 int team_mode_on = 0;
 char buffer[32] = {'\0'}; /*names*/
+char bufferMsg[128] = {'\0'}; /*msgs from inputs*/
 int totalPlayerCount = 0;
 int remainingPlayers = 0;
-int globalPseudoPtr = 0;
-/*
-i think each day we should loop through every player in single mode
-and in teams mode i think looping through teams is enough
-1 person selected from each team or like maybe 2 if it is a crowded lobby
-ok so we have formatCount and that is gonna come in handy
-i will make sure to make it so the first %s is the one taking damage in case of formatCount = 2
-*/
+int eachTeamHasMax = 0;
 
-/*
-check if effectAmount 0, then print directly (misc perhaps)
-if positive check type then do whatever
-if negative check type then do whatever
-usually the second %s won't matter
-ADD more though
-also TODO: i messed up the msg files 
-*/
 int main(){
-	int commandToCont, i = 1; int j = 0;
+	int commandToCont, i = 1; int j = 0, night = 0;
 	srand(time(NULL));
 	/*registering all the players whether it is team or solo mode */
 	readMessageInput();
@@ -83,21 +69,31 @@ int main(){
 	remainingPlayers = totalPlayerCount;
 
 	do{	// each day logic
-		printf("Night #%d\n", i++);
+		printf("Night #%d\n", night++);
 		if(!team_mode_on){ // solo
 			for(i = 0; i < 30; i++){
+				if(soloPlayers[i] == NULL)
+					continue;
 				engine(soloPlayers[i]);
 			}
 		}
 		else // team
 			for(i = 0; i < 4; i++){
 				for(j = 0; j < 10; j++){
+					if(teams[i]->teamPlayers[j] == NULL)
+						continue;
 					engine(teams[i]->teamPlayers[j]);
 				}
 			}
+		printDaySummary();
+		if(remainingPlayers == 1)
+			break;
 		printf("1 to continue, 0 to stop: ");
 		scanf("%d", &commandToCont);
 	} while(remainingPlayers && commandToCont);
+	if(remainingPlayers == 1){
+		puts("well someone did win");
+	}
 }
 
 void engine(Player *primary){
@@ -159,8 +155,10 @@ void engine(Player *primary){
 }
 
 void changeHP(Player *player, enum effectType fx, int magnitude){
+	if(player == NULL)
+		return;
 	if(fx == HEAL){
-		player->HP = (magnitude + player->HP) % 100;
+		player->HP = (magnitude + player->HP >= 100) ? 100: magnitude + player->HP;
 		printf("%s +%d\n", player->name, magnitude);
 	}
 	else if(fx == DAMAGE){
@@ -175,16 +173,15 @@ void readMessageInput(){ // fills formatCount, fx
 	FILE *healFile = fopen("healmessages.txt", "r");
 	FILE *damageFile = fopen("damagemessages.txt", "r");
 	FILE *miscFile = fopen("miscmessages.txt", "r");
-	Message *append = NULL;
 
-	helperFunc(healFile, append, HEAL);
-	helperFunc(damageFile, append, DAMAGE);
-	helperFunc(miscFile, append, MISC);
+	helperFunc(healFile, HEAL);	
+	helperFunc(damageFile, DAMAGE);
+	helperFunc(miscFile, MISC);
 }
 
-void helperFunc(FILE *file, Message *append, enum effectType fx){
-	while(fgets(buffer, sizeof(buffer), file) != NULL) {
-		append = (Message *)calloc(1, sizeof(Message));
+void helperFunc(FILE *file, enum effectType fx){
+	while(fgets(bufferMsg, sizeof(bufferMsg), file) != NULL) {
+		Message *append = (Message *)calloc(1, sizeof(Message));
 		if(append != NULL){
 			cleanedMessage(append, fx);
 			append->fx = fx;
@@ -194,14 +191,15 @@ void helperFunc(FILE *file, Message *append, enum effectType fx){
 }
 // fills message and effectAmount, also fills all msg arrays
 void cleanedMessage(Message *msg, int fx){ 
-	if(fx){ // not misc
-		msg->effectAmount = atoi(buffer);
-		const char *ptr = buffer;
+	if(fx == HEAL || fx == DAMAGE){ // not misc
+		msg->effectAmount = atoi(bufferMsg);
+		const char *ptr = bufferMsg;
 		for(; *ptr != '\0' && (isdigit(*ptr) || *ptr == '-' || *ptr == ' '); ptr++);
 		strcpy_s(msg->message, sizeof(msg->message), ptr);
 		if(fx == HEAL){
-			if(msg->effectAmount > 40)
+			if(msg->effectAmount > 40){
 				highHealLowOdds[hhlo++] = msg;
+			}
 			else
 				lowHealHighOdds[lhho++] = msg;
 		}
@@ -213,7 +211,7 @@ void cleanedMessage(Message *msg, int fx){
 		}
 	}
 	else{ // misc, no need for taking the int out
-		strcpy_s(msg->message, sizeof(msg->message), buffer);
+		strcpy_s(msg->message, sizeof(msg->message), bufferMsg);
 		miscHasNoOdds[mhno++] = msg;
 	}
 }
@@ -232,6 +230,7 @@ void addPlayersSoloMode(){
 			exit(111);
 		soloPlayers[i] = temp;
 		strcpy_s(temp->name, 32, buffer);
+		temp->HP = 100;
 		printf("%dth player namely %s\n", i + 1, soloPlayers[i]->name);
 		totalPlayerCount++;
 	}
@@ -243,6 +242,7 @@ void addPlayersTeamMode(){
 	int team_size, i, teamNo = 0;
 	puts("team consists of max ___ players.");
 	scanf("%d", &team_size);
+	eachTeamHasMax = team_size;
 	for(i = 0; i < 4; i++){
 		teams[i] = (Team *)calloc(1, sizeof(Team));
 		if(teams[i] == NULL)
@@ -267,6 +267,7 @@ void addPlayersTeamMode(){
 				exit(111);
 			(teams[teamNo])->teamPlayers[i] = temp;
 			strcpy_s(temp->name, 32, buffer);
+			temp->HP = 100;
 			printf("%dth player in team #%d namely %s\n",
 				i + 1, teamNo + 1, teams[teamNo]->teamPlayers[i]->name);
 			totalPlayerCount++;
@@ -277,15 +278,14 @@ void addPlayersTeamMode(){
 Player * pickSecondaryPlayer(Player *primary){
 	int i, j;
 	int forbiddenTeam = 0;
+	Player *returnThis = NULL;
 	// secondary CANNOT be the same as primary.
 	if(!team_mode_on){ // solo
 		int pseudoPtr = rand() % 30;
-		if(soloPlayers[pseudoPtr] != primary){
-			return soloPlayers[pseudoPtr];
-		}
-		else{
-			return soloPlayers[(pseudoPtr + 1) % 30];
-		}
+		while(soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary)
+				pseudoPtr = rand() % 30;
+		
+		return soloPlayers[pseudoPtr];
 	}
 	// secondary CANNOT be in the same team
 	else{ // team
@@ -295,7 +295,10 @@ Player * pickSecondaryPlayer(Player *primary){
 					forbiddenTeam = i;
 					break;
 				}
-		return teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand() % 10];
+		while(returnThis == NULL){
+			returnThis = teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand() % eachTeamHasMax];
+		}
+		return returnThis;
 	}
 }
 
@@ -363,14 +366,14 @@ void printDaySummary(){
 		for(i = 0; i < 30; i++){
 			if(soloPlayers[i] == NULL)
 				continue;
-			printf("%s: %d", soloPlayers[i]->name, soloPlayers[i]->HP);
+			printf("%s: %d\n", soloPlayers[i]->name, soloPlayers[i]->HP);
 		}
 	else // team mode
 		for(i = 0; i < 4; i++){
 			for(j = 0; j < 10; j++){
 				if(teams[i]->teamPlayers[j] == NULL)
 					continue;
-				printf("Team: %d %s: %d", i, 
+				printf("Team: %d %s: %d\n", i, 
 					teams[i]->teamPlayers[j]->name, teams[i]->teamPlayers[j]->HP);
 			}
 		}
