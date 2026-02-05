@@ -6,14 +6,16 @@
 #include <math.h>
 #include <time.h>
 
-#define LIMIT 30
+#define LIMIT 40
 enum effectType {MISC, HEAL, DAMAGE};
 
 typedef struct player{
 	char name[32];
 	int HP;
 }Player;
-Player *soloPlayers[30] = {NULL};
+Player *soloPlayers[40] = {NULL};
+char eliminatedThisRound[40][32] = {NULL};
+int eliminatedCount = 0;
 
 typedef struct team{
 	Player *teamPlayers[10];
@@ -69,9 +71,9 @@ int main(){
 	remainingPlayers = totalPlayerCount;
 
 	do{	// each day logic
-		printf("Night #%d\n", night++);
+		printf("Night #%d\n", 1 + night++);
 		if(!team_mode_on){ // solo
-			for(i = 0; i < 30; i++){
+			for(i = 0; i < LIMIT; i++){
 				if(soloPlayers[i] == NULL)
 					continue;
 				engine(soloPlayers[i]);
@@ -92,7 +94,7 @@ int main(){
 		scanf("%d", &commandToCont);
 	} while(remainingPlayers && commandToCont);
 	if(remainingPlayers == 1){
-		puts("well someone did win");
+		puts("Well, we have a winner!");
 	}
 }
 
@@ -281,9 +283,9 @@ Player * pickSecondaryPlayer(Player *primary){
 	Player *returnThis = NULL;
 	// secondary CANNOT be the same as primary.
 	if(!team_mode_on){ // solo
-		int pseudoPtr = rand() % 30;
+		int pseudoPtr = rand() % LIMIT;
 		while(soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary)
-				pseudoPtr = rand() % 30;
+				pseudoPtr = rand() % LIMIT;
 		
 		return soloPlayers[pseudoPtr];
 	}
@@ -310,9 +312,10 @@ void eliminate(Player *player){
 			for(i = 0; i < 10; i++){
 				if(teams[j]->teamPlayers[i] == player){
 					// remove and break
+					strcpy(eliminatedThisRound[eliminatedCount++], player->name);
 					teams[j]->teamPlayers[i] = NULL;
 					j = 5;
-					printf("%s has been eliminated today.\n", player->name);
+//					printf("%s has been eliminated today.\n", player->name);
 					remainingPlayers--;
 					break;
 				}
@@ -322,7 +325,8 @@ void eliminate(Player *player){
 		for(i = 0; i < totalPlayerCount; i++){
 			if(player == soloPlayers[i]){
  				//remove and break
-				printf("%s has been eliminated today.\n", player->name);
+//				printf("%s has been eliminated today.\n", player->name);
+				strcpy(eliminatedThisRound[eliminatedCount++], player->name);
 				soloPlayers[i] = NULL;
 				remainingPlayers--;
 				break;
@@ -361,9 +365,9 @@ int modeDecision(){
 
 void printDaySummary(){
 	int i, j = 0;
-	puts("Remaining Players with their HP");
+	puts("\nRemaining Players with their HP");
 	if(!team_mode_on) // solo
-		for(i = 0; i < 30; i++){
+		for(i = 0; i < LIMIT; i++){
 			if(soloPlayers[i] == NULL)
 				continue;
 			printf("%s: %d\n", soloPlayers[i]->name, soloPlayers[i]->HP);
@@ -377,4 +381,10 @@ void printDaySummary(){
 					teams[i]->teamPlayers[j]->name, teams[i]->teamPlayers[j]->HP);
 			}
 		}
+	for(i = 0; i < LIMIT && eliminatedThisRound[i][0] != '\0'; i++){
+		printf("%s was eliminated this round\n", eliminatedThisRound[i]);
+		eliminatedThisRound[i][0] = '\0';
+	}
+	eliminatedCount = 0;
+	puts("");
 }

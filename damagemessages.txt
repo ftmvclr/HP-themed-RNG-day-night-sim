@@ -1,5 +1,5 @@
 30 %s got hit by %s with a Bludger while they weren't looking.
-37 %s used Sectumsempra on %s.
+37 %s was Sectumsempra'd by %s.
 25 %s splinched themselves while trying to Apparate.
 19 %s ate a handful of Puking Pastilles.
 24 %s got whacked by the Whomping Willow.
