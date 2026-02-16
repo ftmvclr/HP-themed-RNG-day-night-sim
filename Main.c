@@ -294,8 +294,8 @@ Player * pickSecondaryPlayer(Player *primary){
 	// secondary CANNOT be the same as primary.
 	if(!team_mode_on){ // solo
 		int pseudoPtr = rand() % LIMIT;
-		for(i = 0; soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary; i++){
-			pseudoPtr = rand() % 10;
+		while(soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary){
+			pseudoPtr = rand() % LIMIT;
 		}
 		
 		return soloPlayers[pseudoPtr];
