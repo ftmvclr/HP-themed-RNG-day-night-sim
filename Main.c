@@ -58,6 +58,7 @@ int remainingPlayers = 0;
 int eachTeamHasMax = 0;
 
 int main(){
+
 	int commandToCont, i = 1; int j = 0, night = 0;
 	srand(time(NULL));
 	/*registering all the players whether it is team or solo mode */
@@ -92,13 +93,14 @@ int main(){
 			break;
 		printf("1 to continue, 0 to stop: ");
 		scanf("%d", &commandToCont);
-	} while(remainingPlayers && commandToCont);
+	} while(remainingPlayers > 0 && commandToCont);
 	if(remainingPlayers == 1){
 		puts("Well, we have a winner!");
 	}
 }
 
 void engine(Player *primary){
+	
 	Player *secondary = NULL;
 	int randFx = rand() % 10;
 	enum effectType fxPerPlayer = -1;
@@ -149,11 +151,15 @@ void engine(Player *primary){
 	}
 	if(toDisplay->formatCount != 1){ // we need 1 more player to pick
 		secondary = pickSecondaryPlayer(primary);
-		printf(toDisplay->message, primary, secondary);
+		if(secondary != NULL){
+			printf(toDisplay->message, primary, secondary);
+			changeHP(primary, toDisplay->fx, toDisplay->effectAmount);
+		}
 	}
-	else
+	else{
 		printf(toDisplay->message, primary);
-	changeHP(primary, toDisplay->fx, toDisplay->effectAmount);
+		changeHP(primary, toDisplay->fx, toDisplay->effectAmount);
+	}
 }
 
 void changeHP(Player *player, enum effectType fx, int magnitude){
@@ -281,11 +287,16 @@ Player * pickSecondaryPlayer(Player *primary){
 	int i, j;
 	int forbiddenTeam = 0;
 	Player *returnThis = NULL;
+	if(remainingPlayers == 1){
+		printf("%s is the sole survivor, congratulations!\n", primary->name);
+		return NULL;
+	}
 	// secondary CANNOT be the same as primary.
 	if(!team_mode_on){ // solo
 		int pseudoPtr = rand() % LIMIT;
-		while(soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary)
-				pseudoPtr = rand() % LIMIT;
+		for(i = 0; soloPlayers[pseudoPtr] == NULL || soloPlayers[pseudoPtr] == primary; i++){
+			pseudoPtr = rand() % 10;
+		}
 		
 		return soloPlayers[pseudoPtr];
 	}
@@ -298,7 +309,7 @@ Player * pickSecondaryPlayer(Player *primary){
 					break;
 				}
 		while(returnThis == NULL){
-			returnThis = teams[(forbiddenTeam + (rand() % 3)) % 4]->teamPlayers[rand() % eachTeamHasMax];
+			returnThis = teams[(forbiddenTeam + (1 + rand() % 2)) % 4]->teamPlayers[rand() % eachTeamHasMax];
 		}
 		return returnThis;
 	}
@@ -315,7 +326,6 @@ void eliminate(Player *player){
 					strcpy(eliminatedThisRound[eliminatedCount++], player->name);
 					teams[j]->teamPlayers[i] = NULL;
 					j = 5;
-//					printf("%s has been eliminated today.\n", player->name);
 					remainingPlayers--;
 					break;
 				}
